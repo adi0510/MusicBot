@@ -7,7 +7,7 @@
       "pytgcalls",
       "productivity"
     ],
-    "repository": "https://github.com/adi0510/musicbot",
+    "repository": "https://github.com/adi0510/MusicBot",
     "stack": "container",
     "env": {
       "API_ID": {
