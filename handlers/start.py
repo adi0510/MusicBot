@@ -23,15 +23,15 @@ async def start_(client: Client, message: Message):
             [
                 [
                     InlineKeyboardButton(
-                        "📔 Source Code 📔", url="https://github.com/TheVaders/MusicBot"
+                        "📔 Source Code 📔", url="https://github.com/adi0510/MusicBot"
                     )
                 ],
                 [
                     InlineKeyboardButton(
-                        "💬 Group 💬", url="https://t.me/hellbot_official_chat"
+                        "💬 Group 💬", url="https://t.me/trhofficial"
                     ),
                     InlineKeyboardButton(
-                        "📣 Channel 📣", url="https://t.me/hellbot_official"
+                        "📣 Channel 📣", url="https://t.me/TeamRoarGaming"
                     )
                 ],
                 [
