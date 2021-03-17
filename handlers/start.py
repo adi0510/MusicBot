@@ -1,42 +1,28 @@
-from pyrogram import Client, filters
+from pyrogram import Client
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
-import os
-import sys
-from threading import Thread
-from pyrogram import idle, filters
-from pyrogram.handlers import MessageHandler
-from helpers.wrappers import errors, admins_only
+
+from helpers.filters import command, other_filters, other_filters2
 
 
-@Client.on_message(
-    filters.command("start")
-    & filters.private
-    & ~ filters.edited
-)
-async def start_(client: Client, message: Message):
+@Client.on_message(command("start") & other_filters)
+async def start(_, message: Message):
     await message.reply_text(
-       f"""🙃 Hi {message.from_user.first_name}!
-✨ I am @Addict_Adi Music Player. 
-🥳 I can play music in your Telegram Group's Voice Chat😉
-⚜️ Use these buttons below to know more. 👇""",
+        f"""<b>👋🏻 Hi {message.from_user.first_name}!</b>
+I am  Music Player  bot that lets you play music in your Telegram groups.
+Use the buttons below to know more about me.""",
         reply_markup=InlineKeyboardMarkup(
             [
                 [
                     InlineKeyboardButton(
-                        "📔 Source Code 📔", url="https://github.com/adi0510/MusicBot"
+                        "⚒ Commands", url="https://telegra.ph/AAdi-03-17"
                     )
                 ],
                 [
                     InlineKeyboardButton(
-                        "💬 Group 💬", url="https://t.me/trhofficial"
+                        "💬 Group", url="https://t.me/trhofficial"
                     ),
                     InlineKeyboardButton(
-                        "📣 Channel 📣", url="https://t.me/TeamRoarGaming"
-                    )
-                ],
-                [
-                    InlineKeyboardButton(
-                        "❌ Close ❌", callback_data="close"
+                        "Channel 🔈", url="https://t.me/teamroargaming"
                     )
                 ]
             ]
@@ -44,22 +30,18 @@ async def start_(client: Client, message: Message):
     )
 
 
-@Client.on_message(
-    filters.command("start")
-    & filters.group
-    & ~ filters.edited
-)
-async def start(client: Client, message: Message):
+@Client.on_message(command("start") & other_filters2)
+async def start2(_, message: Message):
     await message.reply_text(
-        "**ADI:** I'm Working!!!\nUse me in Inline to search for a YouTube Video/Music. \n**Happy Streaming**",
+        "💁🏻‍♂️ Do you want to search for a YouTube video?",
         reply_markup=InlineKeyboardMarkup(
             [
                 [
                     InlineKeyboardButton(
-                        "🎶 Search 🎶", switch_inline_query_current_chat=""
+                        "✅ Yes", switch_inline_query_current_chat=""
                     ),
                     InlineKeyboardButton(
-                        "❌ Close ❌", callback_data="close"
+                        "No ❌", callback_data="close"
                     )
                 ]
             ]
