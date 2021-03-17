@@ -16,7 +16,7 @@ from helpers.errors import DurationLimitError
     & ~ filters.edited
 )
 async def play_(client: Client, message: Message):
-    await message.reply_text("**HELLBOTxADI:** Sorry! I can only be used in groups. \nTry again in a group.")
+    await message.reply_text("**ADI:** Sorry! I can only be used in groups. \nTry again in a group.")
 
 
 @Client.on_message(
@@ -28,7 +28,7 @@ async def play_(client: Client, message: Message):
 async def play(client: Client, message_: Message):
     audio = (message_.reply_to_message.audio or message_.reply_to_message.voice) if message_.reply_to_message else None
 
-    res = await message_.reply_text("**HELLBOTxADI:** 🔄 Processing...")
+    res = await message_.reply_text("**ADI:** 🔄 Processing...")
 
     if audio:
         if round(audio.duration / 60) > DURATION_LIMIT:
@@ -59,7 +59,7 @@ async def play(client: Client, message_: Message):
                         break
 
         if offset == None:
-            await res.edit_text("**HELLBOTxADI:**❕ You did not give me anything to play.")
+            await res.edit_text("**ADI:**❕ You did not give me anything to play.")
             return
 
         url = text[offset:offset+length]
@@ -73,7 +73,7 @@ async def play(client: Client, message_: Message):
 
     if is_playing:
         position = await sira.add(message_.chat.id, file_path)
-        await res.edit_text(f"**HELLBOTxADI:** #️⃣ Queued at position {position}.")
+        await res.edit_text(f"**ADI:** #️⃣ Queued at position {position}.")
     else:
-        await res.edit_text("**HELLBOTxADI:** ▶️ Playing...")
+        await res.edit_text("**ADI:** ▶️ Playing...")
         tgcalls.pytgcalls.join_group_call(message_.chat.id, file_path, 48000)
