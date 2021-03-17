@@ -1,79 +1,71 @@
-from pyrogram import Client, filters
-from pyrogram.types import Message
+from os import path
 
-import tgcalls
-from converter import convert
-from youtube import download
-import sira
+from pyrogram import Client
+from pyrogram.types import Message, Voice
+
+import callsmusic
+
+import converter
+import youtube
+import queues
+
 from config import DURATION_LIMIT
-from helpers.wrappers import errors
 from helpers.errors import DurationLimitError
+from helpers.filters import command, other_filters
+from helpers.wrappers import errors
 
 
-@Client.on_message(
-    filters.command("play")
-    & filters.private
-    & ~ filters.edited
-)
-async def play_(client: Client, message: Message):
-    await message.reply_text("**ADI:** Sorry! I can only be used in groups. \nTry again in a group.")
-
-
-@Client.on_message(
-    filters.command("play")
-    & filters.group
-    & ~ filters.edited
-)
+@Client.on_message(command("play") & other_filters)
 @errors
-async def play(client: Client, message_: Message):
-    audio = (message_.reply_to_message.audio or message_.reply_to_message.voice) if message_.reply_to_message else None
+async def play(_, message: Message):
+    audio = (message.reply_to_message.audio or message.reply_to_message.voice) if message.reply_to_message else None
 
-    res = await message_.reply_text("**ADI:** 🔄 Processing...")
+    res = await message.reply_text("**ADI** 🔄 Processing...")
 
     if audio:
         if round(audio.duration / 60) > DURATION_LIMIT:
             raise DurationLimitError(
-                f"**HELLBOTxADI:** Videos longer than {DURATION_LIMIT} minute(s) aren't allowed, the provided video is {audio.duration / 60} minute(s)"
+                f"**ADI** Videos longer than {DURATION_LIMIT} minute(s) aren't allowed, the provided video is {audio.duration / 60} minute(s)"
             )
 
-        file_name = audio.file_id + audio.file_name.split(".")[-1]
-        file_path = await convert(await message_.reply_to_message.download(file_name))
+        file_name = audio.file_unique_id + "." + (
+            audio.file_name.split(".")[-1] if not isinstance(audio, Voice) else "ogg"
+        )
+        file_path = await converter.convert(
+            (await message.reply_to_message.download(file_name))
+            if not path.isfile(path.join("downloads", file_name)) else file_name
+        )
     else:
-        messages = [message_]
+        messages = [message]
         text = ""
         offset = None
         length = None
 
-        if message_.reply_to_message:
-            messages.append(message_.reply_to_message)
+        if message.reply_to_message:
+            messages.append(message.reply_to_message)
 
-        for message in messages:
+        for _message in messages:
             if offset:
                 break
 
-            if message.entities:
-                for entity in message.entities:
+            if _message.entities:
+                for entity in _message.entities:
                     if entity.type == "url":
-                        text = message.text or message.caption
+                        text = _message.text or _message.caption
                         offset, length = entity.offset, entity.length
                         break
 
-        if offset == None:
-            await res.edit_text("**ADI:**❕ You did not give me anything to play.")
+        if offset in (None,):
+            await res.edit_text("**ADI**❕ You did not give me anything to play.")
             return
 
-        url = text[offset:offset+length]
+        url = text[offset:offset + length]
 
-        file_path = await convert(download(url))
+        file_path = await converter.convert(youtube.download(url))
 
-    try:
-        is_playing = tgcalls.pytgcalls.is_playing(message_.chat.id)
-    except:
-        is_playing = False
-
-    if is_playing:
-        position = await sira.add(message_.chat.id, file_path)
-        await res.edit_text(f"**ADI:** #️⃣ Queued at position {position}.")
+    if message.chat.id in callsmusic.pytgcalls.active_calls:
+        position = queues.add(message.chat.id, file_path)
+        await res.edit_text(f"**ADI** #️⃣ Queued at position {position}.")
     else:
-        await res.edit_text("**ADI:** ▶️ Playing...")
-        tgcalls.pytgcalls.join_group_call(message_.chat.id, file_path, 48000)
+        await res.edit_text("**ADI** ▶️ Playing...")
+        callsmusic.pytgcalls.join_group_call(message.chat.id, file_path, 48000, callsmusic.pytgcalls.get_cache_peer())
